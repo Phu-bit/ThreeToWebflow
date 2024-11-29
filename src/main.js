@@ -17,10 +17,15 @@ THREE.ColorManagement.enabled = false;
 /* Variables */
 const gltfLoader = new GLTFLoader()
 
-let scene, camera, renderer, controls, canvas,physics
+let scene, camera, renderer, controls, canvas
+let physics
 let waterBottle;
 let clock = new THREE.Clock()
 let previousTime = 0;
+
+const ballGeo = new THREE.IcosahedronGeometry(1,1)
+const ballMat = new THREE.MeshStandardMaterial({color: 0xffffff})
+
 
 
 /* Parameters */
@@ -49,6 +54,7 @@ async function physicsSetup(){
   
   physics.addScene(scene);
 
+
 }
 
 /* Init */
@@ -62,6 +68,7 @@ async function init() {
   initControls()
   addLights()
   loadModel()  
+
   createGeometry()
   await physicsSetup()
 
@@ -108,7 +115,8 @@ function initRenderer() {
 
 function initCamera() {
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-  camera.position.set(0, 0, 5)
+  camera.position.set(0, 4, 7)
+  camera.lookAt(new THREE.Vector3(0,0,0))
 }
 
 function initGUI() {
@@ -121,8 +129,8 @@ function initGUI() {
 
 function addLights(){
 
-  lights.ambientlight = new THREE.AmbientLight(0xffffff, 0.5)
-  lights.pointLight = new THREE.PointLight(0xffffff, 10, 10)
+  lights.ambientlight = new THREE.AmbientLight(0xffffff, 1)
+  lights.pointLight = new THREE.PointLight(0xffffff, 20, 10)
   lights.pointLight.position.set(1, 1, 3)
   scene.add(lights.ambientlight, lights.pointLight)
 }
@@ -161,32 +169,51 @@ function loadModel(){
       waterBottle.scale.set(3,3,3)
       waterBottle.position.set(0,-0.25,0)
       
-      scene.add(waterBottle)
+      // scene.add(waterBottle)
     }
   )
 }
 
 
 /* Create Geometry */
-
-
 function createGeometry() {
-  const floorPlane = new THREE.PlaneGeometry(100, 100)
-  const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 })
-  const floor = new THREE.Mesh(floorPlane, floorMaterial)
-  floor.rotation.x = -Math.PI * 0.5
-  floor.rotation.z = Math.PI/2 * 0.5
-  floor.position.y = -3.5
 
-  scene.add(floor)
+  /* Floor */
+
+  const floorBox = new THREE.Mesh(
+    new THREE.BoxGeometry(20,.1,20),
+    new THREE.MeshStandardMaterial({color: 0x6e6e6e})
+  )
+
+  floorBox.position.set(0,-3.5,0)
+  floorBox.rotation.set(Math.PI,Math.PI/2 * 0.5, 0)
+  floorBox.userData.physics = { mass: 0 }
+  scene.add(floorBox)
+  
+  /* Test Physics Ball */
+
+  //TODO
+    // get rid of floor
+    // make balls attracted to center
+    // give mouse collider 
+    // make sure balls don't explode everywhere on spawn
+    // figure out why its taking so long to load
+    // replace balls with plastic water bottle model
+
+
+  for (let i = 0; i < 10; i++) {
+    const ball = new THREE.Mesh(ballGeo, ballMat)
+
+    ball.position.set(i ,4,i)
+  
+    ball.userData.physics = { mass: 1 }
+  
+    scene.add(ball)
+      
+  }
+
+
 }
-
-// const geometry = new THREE.BoxGeometry(1, 1, 1)
-// const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
-// let mesh = new THREE.Mesh(geometry, material)
-// scene.add(mesh)
-
-
 
 
 /* Animation */
