@@ -7,7 +7,7 @@ import './styles/style.css'
 import { getBody, getMouseBall } from './bodies.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import RAPIER from 'https://cdn.skypack.dev/@dimforge/rapier3d-compat@0.12.0';
+import RAPIER from '@dimforge/rapier3d-compat'
 
 
 
