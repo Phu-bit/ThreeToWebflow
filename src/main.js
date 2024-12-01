@@ -159,6 +159,15 @@ function addLights(){
 function addEventListeners(){
   window.addEventListener('resize', onResize);
   window.addEventListener('mousemove', onMouseMove)
+  window.addEventListener('touchmove', onTouchMove); 
+}
+
+function onTouchMove(event){
+  if (event.touches.length > 0) {
+    const touch = event.touches[0]
+    mousePos.x = (event.touches.clientX / sizes.width) * 2 - 1
+    mousePos.y = -(event.touches.clientY / sizes.height) * 2 + 1
+  }
 }
 
 function onMouseMove(event){
