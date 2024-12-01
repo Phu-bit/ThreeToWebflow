@@ -4,12 +4,18 @@ import gsap from 'gsap'
 import * as dat from 'lil-gui'
 import * as THREE from 'three'
 import './styles/style.css'
+import { getBody, getMouseBall } from './bodies.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { RapierPhysics } from 'three/examples/jsm/physics/RapierPhysics.js'
+import RAPIER from 'https://cdn.skypack.dev/@dimforge/rapier3d-compat@0.12.0';
 
-console.log(RapierPhysics);
 
+
+//TODO
+  // replace the balls with plastic bottles, then finish the website UI
+  // create loading scene
+  //create info section,
+  //start creating game.
 
 THREE.ColorManagement.enabled = false;
 
@@ -18,14 +24,17 @@ THREE.ColorManagement.enabled = false;
 const gltfLoader = new GLTFLoader()
 
 let scene, camera, renderer, controls, canvas
-let physics
+let gravity, world, mouseball
+let mousePos = new THREE.Vector2()
 let waterBottle;
 let clock = new THREE.Clock()
 let previousTime = 0;
 
 const ballGeo = new THREE.IcosahedronGeometry(1,1)
 const ballMat = new THREE.MeshStandardMaterial({color: 0xffffff})
-
+const numBodies = 100;
+const spawnDuration = 5; 
+const bodies = []
 
 
 /* Parameters */
@@ -50,10 +59,22 @@ const parameters = {
 /* Physics */
 async function physicsSetup(){
 
-  physics = await RapierPhysics();
+  await RAPIER.init() 
+  gravity = new RAPIER.Vector3(0.0, -9.81, 0.0)
+  world = new RAPIER.World(gravity)
   
-  physics.addScene(scene);
+  for (let i = 0; i < numBodies; i++) {
+    const body = getBody(RAPIER, world);
+    bodies.push(body)
+    // console.log(body.mesh.position);
+    
+    scene.add(body.mesh)
+  }
 
+  mouseball = getMouseBall(RAPIER, world);
+  
+  scene.add(mouseball.mesh)
+  
 
 }
 
@@ -68,12 +89,10 @@ async function init() {
   initControls()
   addLights()
   loadModel()  
-
-  createGeometry()
   await physicsSetup()
 
-
-
+  createGeometry()
+    
   animate()
 
 
@@ -93,6 +112,7 @@ function preloadAssets() {
 function initScene() {
   canvas = document.querySelector('canvas.webgl');
   scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x267544)
 
 }
 
@@ -115,7 +135,7 @@ function initRenderer() {
 
 function initCamera() {
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-  camera.position.set(0, 4, 7)
+  camera.position.set(0, 0, 12)
   camera.lookAt(new THREE.Vector3(0,0,0))
 }
 
@@ -138,6 +158,12 @@ function addLights(){
 /* Event Listeners */
 function addEventListeners(){
   window.addEventListener('resize', onResize);
+  window.addEventListener('mousemove', onMouseMove)
+}
+
+function onMouseMove(event){
+  mousePos.x = (event.clientX / sizes.width) * 2 - 1
+  mousePos.y = -(event.clientY / sizes.height) * 2 + 1
 }
 
 function onResize(){
@@ -180,38 +206,15 @@ function createGeometry() {
 
   /* Floor */
 
-  const floorBox = new THREE.Mesh(
-    new THREE.BoxGeometry(20,.1,20),
-    new THREE.MeshStandardMaterial({color: 0x6e6e6e})
-  )
+  // const floorBox = new THREE.Mesh(
+  //   new THREE.BoxGeometry(20,.1,20),
+  //   new THREE.MeshStandardMaterial({color: 0x6e6e6e})
+  // )
 
-  floorBox.position.set(0,-3.5,0)
-  floorBox.rotation.set(Math.PI,Math.PI/2 * 0.5, 0)
-  floorBox.userData.physics = { mass: 0 }
-  scene.add(floorBox)
+  // floorBox.position.set(0,-3.5,0)
+  // floorBox.rotation.set(Math.PI,Math.PI/2 * 0.5, 0)
+  // scene.add(floorBox)
   
-  /* Test Physics Ball */
-
-  //TODO
-    // get rid of floor
-    // make balls attracted to center
-    // give mouse collider 
-    // make sure balls don't explode everywhere on spawn
-    // figure out why its taking so long to load
-    // replace balls with plastic water bottle model
-
-
-  for (let i = 0; i < 10; i++) {
-    const ball = new THREE.Mesh(ballGeo, ballMat)
-
-    ball.position.set(i ,4,i)
-  
-    ball.userData.physics = { mass: 1 }
-  
-    scene.add(ball)
-      
-  }
-
 
 }
 
@@ -231,8 +234,13 @@ function animate() {
     lights.pointLight.position.z = Math.cos(elapsedTime) * 3
 
   }
-  // mesh.rotation.z = mesh.rotation.z + 0.01
-  // mesh.rotation.x = mesh.rotation.x + 0.01
+
+  // Update physics
+  world.step();
+  // console.log(mouseball.mesh.position);
+
+  mouseball.update(mousePos,camera)
+  bodies.forEach(b => b.update())
 
   controls.update()
 
