@@ -4,27 +4,26 @@ import gsap from 'gsap'
 import * as dat from 'lil-gui'
 import * as THREE from 'three'
 import './styles/style.css'
-import { getBody, getMouseBall } from './bodies.js'
+import { getBody, getMouseBall,RapierDebugRenderer, loadModel } from './bodies.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import RAPIER from '@dimforge/rapier3d-compat'
 
 
 
 //TODO
-  // replace the balls with plastic bottles, then finish the website UI
   // create loading scene
   //create info section,
-  //start creating game.
+  //start creating game. !!
 
 THREE.ColorManagement.enabled = false;
 
 
 /* Variables */
-const gltfLoader = new GLTFLoader()
+// const gltfLoader = new GLTFLoader()
 
 let scene, camera, renderer, controls, canvas
-let gravity, world, mouseball
+let gravity, world, mouseball, rapierDebug
 let mousePos = new THREE.Vector2()
 let waterBottle;
 let clock = new THREE.Clock()
@@ -53,7 +52,10 @@ const parameters = {
   test : 'Test',
   controls: {
     enabled: false
-  }
+  },
+  physics: {
+    enabled: false
+  },
 }
 
 /* Physics */
@@ -63,19 +65,24 @@ async function physicsSetup(){
   gravity = new RAPIER.Vector3(0.0, -9.81, 0.0)
   world = new RAPIER.World(gravity)
   
-  for (let i = 0; i < numBodies; i++) {
-    const body = getBody(RAPIER, world);
+  await loadModel()
+  //bodies
+  for (let i = 0; i < 30; i++) {
+    const body = getBody(RAPIER, world, scene);
     bodies.push(body)
     // console.log(body.mesh.position);
     
-    scene.add(body.mesh)
+    // scene.add(body.mesh)
   }
 
+  //mouseball
   mouseball = getMouseBall(RAPIER, world);
-  
   scene.add(mouseball.mesh)
   
-
+  //debug
+  parameters.enabled = true; 
+  rapierDebug = RapierDebugRenderer(RAPIER, world);
+  scene.add(rapierDebug.mesh)
 }
 
 /* Init */
@@ -88,7 +95,7 @@ async function init() {
   initRenderer()
   initControls()
   addLights()
-  loadModel()  
+  // loadModel()  
   await physicsSetup()
 
   createGeometry()
@@ -145,6 +152,9 @@ function initGUI() {
   gui.add(parameters.controls, 'enabled').name('Controls').onChange(() => {
     controls.enabled = parameters.controls.enabled
   })
+  gui.add(parameters.physics, 'enabled').name('Physics Debug').onChange(() => {
+    controls.enabled = parameters.physics.enabled
+  })
 }
 
 function addLights(){
@@ -196,18 +206,18 @@ function onResize(){
 
 /* Load Model */
 
-function loadModel(){
-  gltfLoader.load(
-    'https://cdn.prod.website-files.com/67297b2f70f000c5845e68d7/673bf5a425533c6e03d285cf_Earth_in_a_Bottle_1119020232.glb.txt',
-    (gltf) => {
-      waterBottle = gltf.scene
-      waterBottle.scale.set(3,3,3)
-      waterBottle.position.set(0,-0.25,0)
+// function loadModel(){
+//   gltfLoader.load(
+//     'https://cdn.prod.website-files.com/67297b2f70f000c5845e68d7/673bf5a425533c6e03d285cf_Earth_in_a_Bottle_1119020232.glb.txt',
+//     (gltf) => {
+//       waterBottle = gltf.scene
+//       waterBottle.scale.set(3,3,3)
+//       waterBottle.position.set(0,-0.25,0)
       
-      // scene.add(waterBottle)
-    }
-  )
-}
+//       // scene.add(waterBottle)
+//     }
+//   )
+// }
 
 
 /* Create Geometry */
@@ -235,21 +245,13 @@ function animate() {
   const deltaTime = elapsedTime - previousTime
   previousTime = elapsedTime
 
-  
-  if (waterBottle) {
-    // Add any animation for the loaded model here
-    waterBottle.rotation.y += 0.001
-    lights.pointLight.position.x = Math.sin(elapsedTime) * 3
-    lights.pointLight.position.z = Math.cos(elapsedTime) * 3
-
-  }
-
   // Update physics
   world.step();
   // console.log(mouseball.mesh.position);
 
   mouseball.update(mousePos,camera)
   bodies.forEach(b => b.update())
+  rapierDebug.update(parameters.physics.enabled)
 
   controls.update()
 
