@@ -117,7 +117,7 @@ function getMouseBall(RAPIER, world){
   
   //geometry
   const mouseSize = .5;
-  const mouseLight = new THREE.PointLight(0xffffff,5);
+  const mouseLight = new THREE.PointLight(0xffffff,10,25,1);
   const mouseMesh = new THREE.Mesh(  
     new THREE.IcosahedronGeometry(mouseSize, 8),
     new THREE.MeshStandardMaterial({
@@ -130,7 +130,7 @@ function getMouseBall(RAPIER, world){
   let bodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(0,0,0)
   let mouseRigid = world.createRigidBody(bodyDesc)
   //collider
-  let dynamicCollider = RAPIER.ColliderDesc.ball(mouseSize * 10.0).setRestitution(2.0)
+  let dynamicCollider = RAPIER.ColliderDesc.ball(mouseSize * 10.0).setRestitution(1.0)
   world.createCollider(dynamicCollider, mouseRigid);
 
   //update mouseball

@@ -119,7 +119,7 @@ function preloadAssets() {
 function initScene() {
   canvas = document.querySelector('canvas.webgl');
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x267544)
+  // scene.background = new THREE.Color(0x267544)
 
 }
 
@@ -138,6 +138,7 @@ function initRenderer() {
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
 }
 
 function initCamera() {
@@ -160,9 +161,9 @@ function initGUI() {
 function addLights(){
 
   lights.ambientlight = new THREE.AmbientLight(0xffffff, 1)
-  lights.pointLight = new THREE.PointLight(0xffffff, 20, 10)
-  lights.pointLight.position.set(1, 1, 3)
-  scene.add(lights.ambientlight, lights.pointLight)
+  // lights.pointLight = new THREE.PointLight(0xffffff, 20, 10)
+  // lights.pointLight.position.set(1, 1, 3)
+  scene.add(lights.ambientlight)
 }
 
 /* Event Listeners */
@@ -190,7 +191,7 @@ function onResize(){
   window.addEventListener('resize', () =>
     {
         // Update sizes
-        sizes.width = window.innerWidth
+        sizes.width = window.innerWidth 
         sizes.height = window.innerHeight
     
         // Update camera
