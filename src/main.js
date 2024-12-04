@@ -176,8 +176,10 @@ function addEventListeners(){
 function onTouchMove(event){
   if (event.touches.length > 0) {
     const touch = event.touches[0]
-    mousePos.x = (event.touches.clientX / sizes.width) * 2 - 1
-    mousePos.y = -(event.touches.clientY / sizes.height) * 2 + 1
+    mousePos.x = (touch.clientX / sizes.width) * 2 - 1
+    mousePos.y = -(touch.clientY / sizes.height) * 2 + 1
+    // console.log(event.touches[0]);
+    
   }
 }
 
