@@ -117,7 +117,7 @@ function getMouseBall(RAPIER, world){
   
   //geometry
   const mouseSize = .5;
-  const mouseLight = new THREE.PointLight(0xffffff,10,25,1);
+  const mouseLight = new THREE.PointLight(0xF14FB7,10,25,1);
   const mouseMesh = new THREE.Mesh(  
     new THREE.IcosahedronGeometry(mouseSize, 8),
     new THREE.MeshStandardMaterial({
