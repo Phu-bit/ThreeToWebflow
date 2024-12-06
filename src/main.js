@@ -89,7 +89,7 @@ async function physicsSetup(){
 
 async function init() {
   addEventListeners()
-  initGUI()
+  // initGUI()
   initScene()
   initCamera()
   initRenderer()
@@ -192,10 +192,10 @@ function onResize(){
 
   window.addEventListener('resize', () =>
     {
-        // Update sizes
-        sizes.width = window.innerWidth 
-        sizes.height = window.innerHeight
-    
+        const rect = canvas.getBoundingClientRect();
+        sizes.width = rect.width;
+        sizes.height = rect.height;
+      
         // Update camera
         camera.aspect = sizes.width / sizes.height
         camera.updateProjectionMatrix()
