@@ -2,7 +2,7 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
-const spacialCenter = new THREE.Vector3(0,0,0)
+const spacialCenter = new THREE.Vector3(0,2,0)
 const gltfLoader = new GLTFLoader()
 let bottleMesh, bottleBody, cylinderCollider
 
